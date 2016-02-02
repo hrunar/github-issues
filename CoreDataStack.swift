@@ -87,7 +87,7 @@ extension CIssue: CoreDataObject {
 
 func seed(context: NSManagedObjectContext) -> () {
     let objcio: COrganization = insert(context)
-    objcio.login = "objcio"
+    objcio.login = "hrunar"
 
     let website: CRepository = insert(context)
     website.organization = objcio
@@ -104,7 +104,11 @@ func setupStack() -> NSManagedObjectContext {
     let model = NSManagedObjectModel(contentsOfURL: modelURL)!
     let context = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.MainQueueConcurrencyType)
     context.persistentStoreCoordinator = NSPersistentStoreCoordinator(managedObjectModel: model)
-    context.persistentStoreCoordinator?.addPersistentStoreWithType(NSInMemoryStoreType, configuration: nil, URL: nil, options: nil, error: nil)
+    do {
+        try context.persistentStoreCoordinator?.addPersistentStoreWithType(NSInMemoryStoreType, configuration: nil, URL: nil, options: nil)
+    } catch _ {
+        fatalError("Failed to add persistent store")
+    }
     return context
 }
 
@@ -137,7 +141,11 @@ class ResultsController<A: CoreDataObject> : NSObject {
                 self.changeCallback?(self.fetchedObjects)
             })
             fetchedResultsController.delegate = frcDelegate!
-            fetchedResultsController.performFetch(nil)
+            do {
+                try fetchedResultsController.performFetch()
+            } catch _ {
+                fatalError("performFetch Failed")
+            }
         }
         return fetchedObjects
     }
@@ -172,7 +180,12 @@ func insert<A : CoreDataObject>(context: NSManagedObjectContext) -> A {
 
 func results<A: CoreDataObject>(context: NSManagedObjectContext) -> [A] {
     let fetchRequest = NSFetchRequest(entityName: A.entityName)
-    let results = context.executeFetchRequest(fetchRequest, error: nil)
+    let results: [AnyObject]?
+    do {
+        results = try context.executeFetchRequest(fetchRequest)
+    } catch _ {
+        fatalError("executeFetchRequest failed")
+    }
     fetchRequest.sortDescriptors = A.sortDescriptors
     return results as! [A]
 }
