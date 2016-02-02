@@ -66,13 +66,13 @@ public class NetworkSession: NSObject, NSURLSessionDataDelegate {
     public func URLSession(session: NSURLSession, dataTask: NSURLSessionDataTask, didReceiveData data: NSData) {
         // TODO: if countOfBytesExpectedToReceive is less than zero, make sure we call progress with nil (e.g. unknown)
         let progress = Double(dataTask.countOfBytesReceived) / Double(dataTask.countOfBytesExpectedToReceive)
-        let task = networkTaskForRequest(dataTask.originalRequest)
+        let task = networkTaskForRequest(dataTask.originalRequest!)
         task?.callProgressHandlers(progress)
         task?.data.appendData(data)
     }
     
     public func URLSession(session: NSURLSession, task: NSURLSessionTask, didCompleteWithError error: NSError?) {
-        if let t = networkTaskForRequest(task.originalRequest) {
+        if let t = networkTaskForRequest(task.originalRequest!) {
             removeNetworkTask(t)
             var statusCode = 0
             if let response = task.response as? NSHTTPURLResponse {
