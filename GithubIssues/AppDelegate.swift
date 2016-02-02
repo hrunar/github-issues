@@ -22,7 +22,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         seed(context)
         
         window = UIWindow(frame: UIScreen.mainScreen().bounds)
-        window?.rootViewController = coreDataApp(context) // app()
+        window?.rootViewController = app()
         window?.makeKeyAndVisible()
         return true
     }
