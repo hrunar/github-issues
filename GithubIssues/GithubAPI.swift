@@ -44,7 +44,7 @@ public struct Milestone {
     public let title: String
     
     static func parse(input: AnyObject) -> Milestone? {
-        if let dict = input as? JSONDictionary,
+        if let _ = input as? JSONDictionary,
             title = input["title"] as? String
         {
             return Milestone(title: title)
@@ -70,7 +70,7 @@ extension Repository {
     }
     
     var issuesResource: Resource<[Issue]> {
-        return jsonResource(issuesPath, .GET, [:], array(Issue.parse))
+        return jsonResource(issuesPath, method: .GET, requestParameters: [:], parse: array(Issue.parse))
     }
 
     var issuesPath: String {
@@ -84,7 +84,7 @@ extension Repository {
     func createIssueResource(title: String, body: String) -> Resource<Issue> {
         let path = issuesPath
         let dict: JSONDictionary = ["title": title as NSString, "body": body as NSString]
-        return jsonResource(path, Method.POST, dict, Issue.parse)
+        return jsonResource(path, method: Method.POST, requestParameters: dict, parse: Issue.parse)
     }
 }
 
@@ -102,7 +102,7 @@ extension Organization {
     }
     
     var reposResource: Resource<[Repository]> {
-        return jsonResource(reposURL.path!, .GET, [:], array(Repository.parse))
+        return jsonResource(reposURL.path!, method: .GET, requestParameters: [:], parse: array(Repository.parse))
     }
 }
 
@@ -146,7 +146,7 @@ public func repositories(user: String?) -> Resource<[Repository]> {
     } else {
         path = "/user/repos"
     }
-    return jsonResource(path, .GET, [:], array(Repository.parse))
+    return jsonResource(path, method: .GET, requestParameters: [:], parse: array(Repository.parse))
 }
 
 public func star(repository: Repository) -> Resource<()> {
@@ -157,12 +157,12 @@ public func star(repository: Repository) -> Resource<()> {
 }
 
 public func organizations() -> Resource<[Organization]> {
-    return jsonResource("/user/orgs", .GET, [:], array(Organization.parse))
+    return jsonResource("/user/orgs", method: .GET, requestParameters: [:], parse: array(Organization.parse))
 }
 
 func array<A>(element: AnyObject -> A?)(input: AnyObject) -> [A]? {
     if let theArray = input as? [AnyObject] {
-        var result: [A?] = theArray.map(element)
+        let result: [A?] = theArray.map(element)
         if result.filter({ $0 == nil }).count == 0 {
             return result.map { $0! }
         }
@@ -170,21 +170,21 @@ func array<A>(element: AnyObject -> A?)(input: AnyObject) -> [A]? {
     return nil
 }
 
-//let baseURL = NSURL(string: "https://api.github.com")!
-let baseURL = NSURL(string: "http://localhost:4567")!
+let baseURL = NSURL(string: "https://api.github.com")!
+//let baseURL = NSURL(string: "http://localhost:4567")!
 
 func addToken(r: NSMutableURLRequest) {
     r.setValue("token \(githubToken)", forHTTPHeaderField: "Authorization")
 }
 
 func request<A>(resource: Resource<A>, completion: A? -> () = { _ in }) -> () {
-    apiRequest(addToken, baseURL, resource, { (reason, data) -> () in
+    apiRequest(addToken, baseURL: baseURL, resource: resource, failure: { (reason, data) -> () in
         if let theData = data, str = NSString(data: theData, encoding: NSUTF8StringEncoding) {
-            println(str)
+            print(str)
         }
-        println("Reason: \(reason)")
+        print("Reason: \(reason)")
         completion(nil)
-        }, { progress in
+        }, progress: { progress in
             ()
-        }, { success in completion(success)})
+        }, completion: { success in completion(success)})
 }
