@@ -135,7 +135,7 @@ struct NetworkTask : Equatable {
         mainThread { for f in self.failureHandlers { f(statusCode: statusCode, error: error, data: self.data) } }
     }
     
-    mutating func addHandlers(#failure: NetworkTaskFailureHandler, progress: NetworkTaskProgressHandler, completion: NetworkTaskCompletionHandler) {
+    mutating func addHandlers(failure failure: NetworkTaskFailureHandler, progress: NetworkTaskProgressHandler, completion: NetworkTaskCompletionHandler) {
         failureHandlers += [failure]
         progressHandlers += [progress]
         completionHandlers += [completion]

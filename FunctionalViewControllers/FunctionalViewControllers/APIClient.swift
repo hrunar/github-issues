@@ -24,7 +24,7 @@ public typealias JSONDictionary = [String:AnyObject]
 
 public let statusCodeIs2xx = { $0 >= 200 && $0 < 300}
 
-public struct Resource<A> : Printable {
+public struct Resource<A> : CustomStringConvertible {
     let path: String
     let method : Method
     let requestBody: NSData?
@@ -56,7 +56,7 @@ public struct Resource<A> : Printable {
 
 }
 
-public enum Reason : Printable {
+public enum Reason : CustomStringConvertible {
     case CouldNotParseJSON
     case NoData
     case NoSuccessStatusCode(statusCode: Int)
@@ -107,22 +107,22 @@ public func apiRequest<A>(modifyRequest: NSMutableURLRequest -> (), baseURL: NSU
 }
 
 func decodeJSON(data: NSData) -> AnyObject? {
-    return NSJSONSerialization.JSONObjectWithData(data, options:
-        NSJSONReadingOptions.allZeros, error: nil)
+    return try? NSJSONSerialization.JSONObjectWithData(data, options:
+        NSJSONReadingOptions())
 }
 
 func encodeJSON(input: JSONDictionary) -> NSData? {
-    return NSJSONSerialization.dataWithJSONObject(input, options: NSJSONWritingOptions.allZeros, error: nil)
+    return try? NSJSONSerialization.dataWithJSONObject(input, options: NSJSONWritingOptions())
 }
 
 public func jsonResource<A>(path: String, method: Method, requestParameters: JSONDictionary, parse: AnyObject -> A?) -> Resource<A> {
-    return jsonResource(path, method, requestParameters, statusCodeIs2xx, parse)
+    return jsonResource(path, method: method, requestParameters: requestParameters, validStatusCode: statusCodeIs2xx, parse: parse)
 }
 
 public func jsonResource<A>(path: String, method: Method, requestParameters: JSONDictionary, validStatusCode: Int -> Bool, parse: AnyObject -> A?) -> Resource<A> {
 
     let f  = { decodeJSON($0).flatMap(parse) }
-    let jsonBody = requestParameters.count > 0 ? NSJSONSerialization.dataWithJSONObject(requestParameters, options: NSJSONWritingOptions.allZeros, error: nil) : nil
+    let jsonBody = requestParameters.count > 0 ? (try? NSJSONSerialization.dataWithJSONObject(requestParameters, options: NSJSONWritingOptions())) : nil
     let headers = ["Content-Type": "application/json",
                    "Accept": "application/json"
                   ]
