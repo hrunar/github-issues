@@ -16,7 +16,7 @@ struct IssueInfo {
 
 func issueEditViewController() -> Screen<IssueInfo> {
     return Screen { callback in
-        var vc = UIStoryboard(name: "Storyboard", bundle: nil).instantiateViewControllerWithIdentifier("IssueEditViewController") as! IssueEditViewController
+        let vc = UIStoryboard(name: "Storyboard", bundle: nil).instantiateViewControllerWithIdentifier("IssueEditViewController") as! IssueEditViewController
         vc.completion = callback
         return vc
     }
