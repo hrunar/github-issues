@@ -12,14 +12,14 @@ import CoreData
 
 func coreDataApp(context: NSManagedObjectContext) -> UIViewController {
     
-    let orgsScreen: Screen<COrganization> = coreDataTableViewController(ResultsController(context: context), standardCell { $0.login } , navigationItem: defaultNavigationItem)
+    let orgsScreen: Screen<COrganization> = coreDataTableViewController(ResultsController(context: context), configuration: standardCell { $0.login } , navigationItem: defaultNavigationItem)
     
     let reposScreen: COrganization -> Screen<CRepository> = { (org: COrganization) in
-        coreDataTableViewController(org.repositoriesController, standardCell { $0.name })
+        coreDataTableViewController(org.repositoriesController, configuration: standardCell { $0.name })
     }
     
     let issuesScreen: CRepository -> Screen<CIssue> = {
-        coreDataTableViewController($0.issuesController, standardCell { $0.title })
+        coreDataTableViewController($0.issuesController, configuration: standardCell { $0.title })
     }
     
     let addIssue: CRepository -> BarButton = { repo in
@@ -45,7 +45,7 @@ func app() -> UIViewController {
     let orgsScreen: LoginInfo -> Screen<Organization> = { loginInfo in
         var navigationItem = defaultNavigationItem
         navigationItem.title = "Organizations"
-        return resourceTableViewController(organizations(), standardCell { organization in
+        return resourceTableViewController(organizations(), configuration: standardCell { organization in
             organization.login
             }, navigationItem: navigationItem)
     }
@@ -54,7 +54,7 @@ func app() -> UIViewController {
     let reposScreen: Organization -> Screen<Repository> = { org in
         var navigationItem = defaultNavigationItem
         navigationItem.title = org.login
-        return resourceTableViewController(org.reposResource, subtitleCell { repo in
+        return resourceTableViewController(org.reposResource, configuration: subtitleCell { repo in
             (repo.name, repo.description_)
             }, navigationItem: navigationItem)
     }
@@ -62,7 +62,7 @@ func app() -> UIViewController {
     let issuesScreen: Repository -> Screen<Issue> = { repo in
         var navigationItem = defaultNavigationItem
         navigationItem.title = repo.name
-        return resourceTableViewController(repo.issuesResource, subtitleCell { issue in
+        return resourceTableViewController(repo.issuesResource, configuration: subtitleCell { issue in
             (issue.title, issue.state.rawValue)
             }, navigationItem: navigationItem)
     }
