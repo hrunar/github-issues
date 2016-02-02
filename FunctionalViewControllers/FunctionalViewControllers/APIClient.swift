@@ -68,8 +68,8 @@ public enum Reason : CustomStringConvertible {
         switch self {
         case .CouldNotParseJSON: return "Could not parse JSON"
         case .NoData: return "No Data"
-        case let .NoSuccessStatusCode(statusCode): return "No success status code"
-        case .DidNotValidate(let errors): return "Did not validate (errors)"
+        case .NoSuccessStatusCode(_): return "No success status code"
+        case .DidNotValidate( _): return "Did not validate (errors)"
         case .Other(let err): return "Other error \(err.localizedDescription) \(err.code)"
         case .Unauthorized: return "Unauthorized"
         }
